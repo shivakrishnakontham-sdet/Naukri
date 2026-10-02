@@ -11,7 +11,7 @@ function getProfile(index) {
   }
 
   const profiles = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
-  if (!Array.isArray(profiles) || profiles.length !== 2) {
+  if (!Array.isArray(profiles) || profiles.length !== 3) {
     throw new Error('credentials.json must contain exactly two profile objects.');
   }
 
@@ -23,7 +23,7 @@ function getProfile(index) {
   return profile;
 }
 
-for (const index of [0, 1]) {
+for (const index of [0, 1, 2]) {
   test(`update Naukri profile ${index + 1}`, async ({ browser }) => {
     const profile = getProfile(index);
     const context = await browser.newContext({
