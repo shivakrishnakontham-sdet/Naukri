@@ -1,0 +1,46 @@
+name: Naukri profile tests
+
+on:
+  push:
+  schedule:
+    - cron: '*/30 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: naukri-profile-tests
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Create credentials file
+        env:
+          NAUKRI_CREDENTIALS_JSON: ${{ secrets.NAUKRI_CREDENTIALS_JSON }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const profiles = JSON.parse(process.env.NAUKRI_CREDENTIALS_JSON || 'null');
+          if (!Array.isArray(profiles) || profiles.length !== 3 || profiles.some((profile) => !profile.email || !profile.password)) {
+            throw new Error('Set the NAUKRI_CREDENTIALS_JSON repository secret to an array of three profile objects.');
+          }
+          fs.writeFileSync('credentials.json', JSON.stringify(profiles), { mode: 0o600 });
+          NODE
+
+      - name: Run Playwright tests
+        run: npx playwright test --project=chromium

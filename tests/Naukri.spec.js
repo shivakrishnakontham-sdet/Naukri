@@ -12,7 +12,7 @@ function getProfile(index) {
 
   const profiles = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
   if (!Array.isArray(profiles) || profiles.length !== 3) {
-    throw new Error('credentials.json must contain exactly two profile objects.');
+    throw new Error('credentials.json must contain exactly three profile objects.');
   }
 
   const profile = profiles[index];
